@@ -1,7 +1,11 @@
 package main
 
 import (
+	"contact-app/internal/handlers/rest"
+	"contact-app/internal/repository/psql"
+	"contact-app/internal/service"
 	"contact-app/pkg/database"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"time"
@@ -13,7 +17,7 @@ func main() {
 		Port:     5432,
 		Username: "postgres",
 		DBName:   "postgres",
-		SSLMode:  "prefer",
+		SSLMode:  "disable",
 		Password: "1234",
 	})
 
@@ -22,6 +26,10 @@ func main() {
 	}
 
 	defer db.Close()
+
+	booksRepo := psql.NewContacts(db)
+	booksService := service.NewContacts(booksRepo)
+	handler := rest.NewHandler(booksService)
 
 	srv := &http.Server{
 		Addr:    ":8080",
